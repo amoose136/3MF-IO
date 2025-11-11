@@ -37,6 +37,13 @@ Early scaffolding.
 
 ---
 
+## License
+
+This project is licensed under the **GNU General Public License v3.0 or later (GPL-3.0-or-later)**.  
+See the [LICENSE](./LICENSE) file for details.
+
+It also bundles `lib3mf`, which is licensed under a BSD/Zlib-style permissive license.
+
 ## Development setup (Pixi)
 
 This project uses [Pixi](https://pixi.sh) for environment management.
@@ -47,3 +54,4 @@ Follow the instructions on the Pixi site, then in the repo root:
 
 ```bash
 pixi install
+```
