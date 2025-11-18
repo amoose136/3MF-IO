@@ -2,17 +2,8 @@
 
 Experimental 3MF import/export core for Blender, built on top of **lib3mf**, with a focus on:
 
-- **Textures / UVs** (Texture2D + Texture2DGroup)
-- Future **segmentation / multimaterial** workflows
-- Clean, testable Python core that can be used both:
-  - inside a Blender add-on, and
-  - standalone for tooling / CI.
-
-This repo is split into:
-
-- `src/blender3mf/` – pure Python + lib3mf “core” (no `bpy` dependencies)
-- `addon/` – Blender add-on glue (import/export operators, UI)
-- `tests/` – unit tests for the core
+-   **Textures / UVs** (Texture2D + Texture2DGroup)
+-   Future **segmentation / multimaterial** workflows
 
 The long-term goal is to make it easy to go:
 
@@ -26,14 +17,18 @@ without being locked into per-face segmentation strings.
 
 Early scaffolding.
 
-- [x] Repo + basic Python package layout
-- [x] MIT license
-- [ ] Minimal Model/mesh abstraction
-- [ ] lib3mf-based reader/writer
-- [ ] Basic round-trip tests
-- [ ] Blender add-on stub
-- [ ] Texture / UV support
-- [ ] Segmentation / multimaterial mapping
+-   [x] Repo + basic Python package layout
+-   [x] MIT license
+-   [x] lib3mf-based reader
+-   [x] Support Model Naming MetaData
+-   [ ] Support Basic Model Transforms
+-   [ ] Support Robust Units
+-   [ ] lib3mf-based writer
+-   [ ] Basic round-trip tests
+-   [ ] Texture / UV support
+-   [ ] Segmentation / multimaterial mapping
+-   [ ] Seam Painting Support
+-   [ ] Fuzzy Print Support
 
 ---
 

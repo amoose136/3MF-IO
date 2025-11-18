@@ -5,6 +5,8 @@ from bpy_extras.io_utils import ImportHelper
 from bpy.props import StringProperty
 
 import xml.etree.ElementTree as ET
+import zipfile
+
 import lib3mf
 from lib3mf import get_wrapper
 
@@ -66,6 +68,7 @@ def _build_name_map(model):
 
     return names_by_res_id
 
+
 def _load_slic3r_object_names_from_attachment(model) -> dict[int, str]:
     """
     Use lib3mf's attachment API to load MetaData/Slic3r_PE_model.config,
@@ -90,6 +93,7 @@ def _load_slic3r_object_names_from_attachment(model) -> dict[int, str]:
         for i in range(count):
             att = model.GetAttachment(i)
             path = att.GetPath()  # e.g. "MetaData/Slic3r_PE_model.config"
+            print(f"[3MF IO] Attachment[{i}] path: {path!r}")
             if path and path.lower().endswith("slic3r_pe_model.config"):
                 attachment = att
                 break
@@ -102,7 +106,6 @@ def _load_slic3r_object_names_from_attachment(model) -> dict[int, str]:
     try:
         raw = attachment.WriteToBuffer()
     except TypeError:
-        # Some bindings want a preallocated buffer; try that as a fallback
         size = attachment.GetStreamSize()
         buf = bytearray(size)
         attachment.WriteToBuffer(buf)
@@ -115,7 +118,41 @@ def _load_slic3r_object_names_from_attachment(model) -> dict[int, str]:
 
     text = data.decode("utf-8", errors="replace")
 
-    # 4) Parse Slic3r_PE_model.config XML
+    return _parse_slic3r_config_xml(text)
+
+
+def _load_slic3r_object_names_from_zip(path: str) -> dict[int, str]:
+    """
+    Fallback: use Python's zipfile module to load MetaData/Slic3r_PE_model.config
+    when it is not exposed as a 3MF attachment (Prusa/Slic3r does this).
+    """
+    try:
+        with zipfile.ZipFile(path, "r") as zf:
+            target_name = None
+            for name in zf.namelist():
+                lower = name.lower()
+                if lower.endswith("slic3r_pe_model.config"):
+                    target_name = name
+                    break
+
+            if not target_name:
+                print("[3MF IO] No Slic3r_PE_model.config found via zipfile either")
+                return {}
+
+            with zf.open(target_name) as f:
+                text = f.read().decode("utf-8", errors="replace")
+
+        return _parse_slic3r_config_xml(text)
+    except Exception as e:
+        print(f"[3MF IO] zipfile fallback failed: {e!r}")
+        traceback.print_exc()
+        return {}
+
+
+def _parse_slic3r_config_xml(text: str) -> dict[int, str]:
+    """
+    Parse the content of Slic3r_PE_model.config and return {object_id: name}.
+    """
     root = ET.fromstring(text)
     id_to_name: dict[int, str] = {}
 
@@ -148,20 +185,32 @@ def _load_slic3r_object_names_from_attachment(model) -> dict[int, str]:
                 continue
             id_to_name[obj_id] = name
 
-    print(f"[3MF IO] Loaded Slic3r names for IDs: {id_to_name}")
+    print(f"[3MF IO] Parsed Slic3r names: {id_to_name}")
     return id_to_name
 
+
+def _load_slic3r_object_names(path: str, model) -> dict[int, str]:
+    """
+    Hybrid loader:
+      1. Try lib3mf attachments (for 3MFs that register the config as an attachment).
+      2. If that yields nothing, fall back to zipfile direct access.
+    """
+    names = _load_slic3r_object_names_from_attachment(model)
+    if names:
+        return names
+
+    print("[3MF IO] Falling back to zipfile for Slic3r names")
+    return _load_slic3r_object_names_from_zip(path)
 
 
 def _name_for_mesh(mesh_obj, names_by_res_id, default_index):
     """
     Pick the "best" name for this mesh resource:
-      1. From build-item-derived name map (if any)
+      1. From names_by_res_id (build items + slicer metadata)
       2. From the object's own Name
       3. From the object's PartNumber
       4. Fallback to a generic 3MF_Mesh_N
     """
-    # Try via resource ID from build items first
     res_id = None
     try:
         res_id = mesh_obj.GetResourceID()
@@ -174,7 +223,6 @@ def _name_for_mesh(mesh_obj, names_by_res_id, default_index):
     if res_id is not None and res_id in names_by_res_id:
         return names_by_res_id[res_id]
 
-    # Fallbacks on the mesh itself
     try:
         name = (mesh_obj.GetName() or "").strip()
         if name:
@@ -214,8 +262,19 @@ class SHADOWMOOSE_OT_import_3mf(bpy.types.Operator, ImportHelper):
             reader = model.QueryReader("3mf")
             reader.ReadFromFile(path)
 
-            # Build name map from build items
+            # Slic3r/Prusa-specific names (via attachment or zipfile)
+            slic3r_names = _load_slic3r_object_names(path, model)
+
+            # Build base name map from build items
             names_by_res_id = _build_name_map(model)
+
+            # Overlay Slic3r names so they win if they exist
+            # key:  3MF object ID (res_id)
+            # value: "Cthuwu.stl", etc.
+            for obj_id, name in slic3r_names.items():
+                names_by_res_id[obj_id] = name
+
+            print(f"[3MF IO] Final name map (res_id -> name): {names_by_res_id}")
 
             mesh_it = model.GetMeshObjects()
 
@@ -223,13 +282,15 @@ class SHADOWMOOSE_OT_import_3mf(bpy.types.Operator, ImportHelper):
             scene = context.scene
             collection = scene.collection
 
-            for _ in range(mesh_it.Count()):
+            mesh_count = mesh_it.Count()
+            print(f"[3MF IO] Mesh object count: {mesh_count}")
+
+            for _ in range(mesh_count):
                 mesh_it.MoveNext()
                 mesh3mf = mesh_it.GetCurrentMeshObject()
 
                 name = _name_for_mesh(mesh3mf, names_by_res_id, imported_count)
 
-                # Extract vertices
                 verts = [
                     (v.Coordinates[0], v.Coordinates[1], v.Coordinates[2])
                     for v in mesh3mf.GetVertices()
@@ -254,8 +315,14 @@ class SHADOWMOOSE_OT_import_3mf(bpy.types.Operator, ImportHelper):
                 obj = bpy.data.objects.new(name, me)
                 collection.objects.link(obj)
 
+                try:
+                    res_id_debug = mesh3mf.GetResourceID()
+                except Exception:
+                    res_id_debug = None
+
                 print(
-                    f"[3MF IO] Imported mesh '{name}' with "
+                    f"[3MF IO] Imported mesh '{name}' "
+                    f"(res_id={res_id_debug}) with "
                     f"{len(verts)} verts, {len(faces)} tris"
                 )
                 imported_count += 1
@@ -271,7 +338,6 @@ class SHADOWMOOSE_OT_import_3mf(bpy.types.Operator, ImportHelper):
             return {'CANCELLED'}
 
 
-
 # ----- Menu integration ----------------------------------------------------
 
 
@@ -284,8 +350,6 @@ def menu_func_import(self, context):
 
 
 def register():
-    # auto_load already registers Operator classes;
-    # this just wires the menu entry.
     bpy.types.TOPBAR_MT_file_import.append(menu_func_import)
 
 
