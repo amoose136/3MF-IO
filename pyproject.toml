@@ -1,0 +1,41 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "blender-3mf-texture-io"
+version = "0.1.0"
+description = "Experimental 3MF import/export core for Blender (textures/UVs)"
+authors = [ { name = "amoose136" } ]
+license = { text = "GPL-3.0-or-later" }
+readme = "README.md"
+requires-python = ">=3.11"
+dependencies = [
+    "lib3mf>=2.4.1,<3",
+    "fake-bpy-module>=20251003,<20251004" # this is just for development outside blender so completion works without red underlines and module not found errors
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=7.0", "pytest-cov"]
+
+[tool.pixi]
+[tool.pixi.workspace]
+name = "blender-3mf-texture-io"
+version = "0.1.0"
+platforms = ["osx-arm64"]
+channels = ["conda-forge"]
+authors = ["amoose136 <amoose136@gmail.com>"]
+
+[tool.pixi.tasks.test]
+description = "Install test deps (if needed) and run the test suite"
+# The command first ensures pytest is available, then runs the tests quietly.
+cmd = "python3 -m pytest -q"
+
+[tool.pixi.tasks.download-lib3mf-wheel]
+description = "Download lib3mf wheels for all platforms into src/wheels"
+cmd = """
+mkdir -p src/wheels && \
+python3 -m pip download --only-binary=:all: --no-deps -d src/wheels 'lib3mf>=2.4.1,<3' --platform=macosx_10_9_universal2 && \
+python3 -m pip download --only-binary=:all: --no-deps -d src/wheels 'lib3mf>=2.4.1,<3' --platform=manylinux2014_x86_64 && \
+python3 -m pip download --only-binary=:all: --no-deps -d src/wheels 'lib3mf>=2.4.1,<3' --platform=win_amd64
+"""

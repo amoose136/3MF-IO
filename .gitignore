@@ -1,0 +1,4 @@
+.DS_Store
+.pixi
+__pycache__
+*.whl
