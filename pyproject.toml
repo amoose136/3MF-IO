@@ -22,7 +22,7 @@ dev = ["pytest>=7.0", "pytest-cov"]
 [tool.pixi.workspace]
 name = "blender-3mf-texture-io"
 version = "0.1.0"
-platforms = ["osx-arm64"]
+platforms = ["osx-arm64", "win-64", "linux-64"]
 channels = ["conda-forge"]
 authors = ["amoose136 <amoose136@gmail.com>"]
 
