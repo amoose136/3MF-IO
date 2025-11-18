@@ -2,14 +2,14 @@
 
 Experimental 3MF import/export core for Blender, built on top of **lib3mf**, with a focus on:
 
--   **Textures / UVs** (Texture2D + Texture2DGroup)
--   Future **segmentation / multimaterial** workflows
+- **Textures / UVs** (Texture2D + Texture2DGroup)
+- Future **segmentation / multi-material** workflows
 
 The long-term goal is to make it easy to go:
 
 > **Blender painting / texturing → 3MF with textures → slicers / viewers → back to Blender**
 
-without being locked into per-face segmentation strings. Currently in early stages. For importing I aim to make this compatible with 3mf from standard consumer level 3d slicers. For exporting, a particular flavor of 3mf may need to be specified depending on the target slicer but I really would like things to be as confirming to the 3mf specification as possible and then hopefully over time the slicers can slowly make more compliant 3mf instead of using a bunch of different bespoke solutions to the same problems.
+without being locked into per-face segmentation strings. Currently in the early stages. For importing, I aim to make this compatible with 3MF from standard consumer-level 3D slicers. For exporting, a particular flavor of 3MF may need to be specified depending on the target slicer, but I would really like things to be as conforming to the 3MF specification as possible, and then hopefully over time the slicers can slowly make more compliant 3MF files instead of using a bunch of different bespoke solutions to the same problems.
 
 ---
 
@@ -18,41 +18,41 @@ without being locked into per-face segmentation strings. Currently in early stag
 Very early days. Not useful yet.
 
 - [x] Repo + basic Python package layout
-- [x] Reader (3mf -> Blender data)
-  - [x] Base Mesh Geometry
-  - [x] Model Naming and Collection metadata (annoyingly using xml tree reading for this instead of lib3mf at the moment for technical reasons)
-  - [ ] Basic Model and Collections Transforms (matrix)
-  - [ ] Robust Unit Conversions (mm/in/ft/etc)
-  - [ ] Base Material Support
-  - [ ] Physical based / Shader Material Support (not made by slicers but other programs support it) 
+- [x] Reader (3MF → Blender data)
+  - [x] Base mesh geometry
+  - [x] Model naming and collection metadata (annoyingly using XML tree reading for this instead of lib3mf at the moment for technical reasons)
+  - [ ] Basic model and collection transforms (matrix)
+  - [ ] Robust unit conversions (mm / in / ft / etc.)
+  - [ ] Base material support
+  - [ ] Physically based / shader material support (not made by slicers, but other programs support it) 
   - [ ] Texture / UV support
-  - [ ] Modifier Mesh Properties (support a subset of slicer settings)
+  - [ ] Modifier mesh properties (support a subset of slicer settings)
   - [ ] Boolean objects as Boolean modifiers
-  - [ ] Support / Enforcers Blockers
-  - [ ] Segmentation / multimaterial mapping
-  - [ ] Seam Painting Support
+  - [ ] Supports / enforcers / blockers
+  - [ ] Segmentation / multi-material mapping
+  - [ ] Seam painting support
   - [ ] Text objects
-  - [ ] Fuzzy Print Support (possibly later with a new V2 / UV texture based fuzzy printing)
-  - [ ] Volumetrics extension? Blender supports sdfs / levelsets via geometry nodes as of version 5.0 (OpenVDB functions)... maybe this can be imported at least? Very low priority for now.
-- [ ] Writer (Blender Data -> 3mf)
-  - [ ] Base Mesh Geometry
-  - [ ] Model Naming and Collection metadata
-  - [ ] Basic Model and Collections Transforms (matrix)
-  - [ ] Robust Unit Conversions (mm/in/ft/etc)
-  - [ ] Base Material Support
-  - [ ] Texture / UV support (currently no consumer slicer supports this...for now. 👀  Possibly can instead bake an texture / UV image to segmentation strings in the meantime but that's really gross. )
-  - [ ] Modifier Mesh Properties (support a subset of slicer settings)
+  - [ ] Fuzzy print support (possibly later with a new V2 / UV texture-based fuzzy printing)
+  - [ ] Volumetrics extension? Blender supports SDFs / level sets via geometry nodes as of version 5.0 (OpenVDB functions)... maybe this can be imported at least? Very low priority for now.
+- [ ] Writer (Blender data → 3MF)
+  - [ ] Base mesh geometry
+  - [ ] Model naming and collection metadata
+  - [ ] Basic model and collection transforms (matrix)
+  - [ ] Robust unit conversions (mm / in / ft / etc.)
+  - [ ] Base material support
+  - [ ] Texture / UV support (currently no consumer slicer supports this... for now. 👀 Possibly can instead bake a texture / UV image to segmentation strings in the meantime, but that's really gross.)
+  - [ ] Modifier mesh properties (support a subset of slicer settings)
   - [ ] Boolean objects as Boolean modifiers
-  - [ ] Support / Enforcers Blockers
-  - [ ] Segmentation / multimaterial mapping
-  - [ ] Seam Painting Support
+  - [ ] Supports / enforcers / blockers
+  - [ ] Segmentation / multi-material mapping
+  - [ ] Seam painting support
   - [ ] Text objects
-  - [ ] Fuzzy Print Support (possibly later with a new V2 / UV texture based fuzzy printing which would support grayscale mapping that would make it so fuzzy print isn't all or nothing but instead could have an intensity that fades in or out over a region)
-  - [ ] Volumentrics? (currently no consumer slicer supports this but if a node tree only uses certain nodes, it's theoretically possible to save that to 3mf volumetrics...) Very very low priority.
+  - [ ] Fuzzy print support (possibly later with a new V2 / UV texture-based fuzzy printing which would support grayscale mapping that would make it so fuzzy print isn't all-or-nothing but instead could have an intensity that fades in or out over a region)
+  - [ ] Volumetrics? (currently no consumer slicer supports this, but if a node tree only uses certain nodes, it's theoretically possible to save that to 3MF volumetrics...) Very, very low priority.
 - [ ] Basic round-trip testing to ensure the plugin doesn't break with new feature implementation
-  - [ ] Files from BambuStudio, Cura, OrcaSlicer, PrusaSlicer, are all importable
-  - [ ] Files from FreeCAD, Fusion360 are importable
-  - [ ] Performance for IO should generally by on par or faster than Ghostkeeper's solution was (thanks Ghostkeeper for the previous work in enabling 3mf support for blender!).
+  - [ ] Files from Bambu Studio, Cura, OrcaSlicer, PrusaSlicer are all importable
+  - [ ] Files from FreeCAD, Fusion 360 are importable
+  - [ ] Performance for I/O should generally be on par with, or faster than, Ghostkeeper's solution was (thanks, Ghostkeeper, for the previous work in enabling 3MF support for Blender!).
 
 ---
 
