@@ -1,4 +1,4 @@
-# 3MF-IO
+# 3MF-B-IO
 
 Experimental 3MF import/export core for Blender, built on top of **lib3mf**, with a focus on:
 
