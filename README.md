@@ -42,10 +42,10 @@ Very early days. Not useful yet.
   - [ ] Base material support
   - [ ] Texture / UV support (currently no consumer slicer supports this... for now. 👀 Possibly can instead bake a texture / UV image to segmentation strings in the meantime, but that's really gross.)
   - [ ] Modifier mesh properties (support a subset of slicer settings)
-  - [ ] Boolean objects as Boolean modifiers
-  - [ ] Supports / enforcers / blockers
-  - [ ] Segmentation / multi-material mapping
-  - [ ] Seam painting support
+  - [ ] Boolean modifiers as Boolean objects or modifier meshes
+  - [ ] Supports / enforcers / blockers based on stored object attributes
+  - [ ] Segmentation / multi-material mapping (not sure how this will work yet as blender doesn't support string attributes on faces)
+  - [ ] Seam painting support (not sure how this will work yet as blender doesn't support string attributes on faces)
   - [ ] Text objects
   - [ ] Fuzzy print support (possibly later with a new V2 / UV texture-based fuzzy printing which would support grayscale mapping that would make it so fuzzy print isn't all-or-nothing but instead could have an intensity that fades in or out over a region)
   - [ ] Volumetrics? (currently no consumer slicer supports this, but if a node tree only uses certain nodes, it's theoretically possible to save that to 3MF volumetrics...) Very, very low priority.
